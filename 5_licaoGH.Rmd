@@ -1,0 +1,170 @@
+---
+title: "Lição GitHub nº 5"
+subtitle: "Construindo gráficos com ggplot2"
+author: "jeovane borges silva dos santos"
+date: "(06/09/2021)"
+output:
+ html_notebook:
+toc: yes
+toc_float: yes
+hightlight: tango
+---
+
+
+**Introdução**
+
+---
+Conclui seis gráficos,  sendo os mesmos que foram apresentados na atividade.  
+Os dataset utilizados  foram milhas por galao e notas disciplinas
+
+---
+
+
+```{r}
+library(tidyverse)
+```
+```{r}
+dados_mpg <- read_csv("dados/milhas_por_galao.csv")
+dados_notas <- read_csv("dados/notas_disciplina.csv")
+
+
+```
+
+
+**1 Gráficos de Pontos**
+
+----
+
+```{r}
+ggplot(data = dados_mpg) +
+  aes(x = cilindrada, y = rodovia) +
+  geom_point(size = 2, aes(color = classe)) +
+  facet_grid(.~ano) +
+  geom_smooth(method = lm, se = FALSE, color = "red") +
+  theme_bw() +
+  labs(
+    title = "Correlação entre variáveis numéricas",
+    subtitle = "Cilindrada vs Milhas por Galão",
+    x = "Cilindrada",
+    y = "Milhas por Galão de Combustível"
+  )
+```
+
+
+**2 Gráficos de linha**
+
+----
+
+
+```{r}
+notas_tidy <- dados_notas %>% 
+  pivot_longer(
+    !Curso,
+    names_to = "ano",
+    values_to = "notas"
+  ) %>% 
+  rename(curso = Curso)
+
+notas_tidy
+```
+  
+```{r}
+notas_tidy %>% 
+  group_by(ano) %>% 
+  summarise(
+    media_notas = round(mean(notas), 1)
+  ) %>% 
+  ggplot(aes(x = ano, y = media_notas, group = 1)) +
+  geom_line(color = "#BF616A", size = 1) +
+  labs(
+    title = "Gráfico de Linhas das Notas",
+    x = "",
+    y = "Média das Notas"
+  ) +
+  theme_minimal()
+```
+---
+
+Pode observar  que  durante  o ano 2010 até 2015 havia um número baixo de aprovação  e depois 2015 houve um aumento significativo, sendo em 2017 o maior número de notas alta
+
+
+
+**3 Gráfico de Colunas**
+
+
+----
+
+```{r}
+dados_mpg %>% 
+  count(combustivel) %>% 
+  ggplot(aes(x = fct_reorder(combustivel, -n), y = n, fill = combustivel)) +
+  geom_col() +
+  scale_fill_viridis_d() +
+  labs(
+    title = "Comparando os tipos de combustíveis",
+    subtitle = "(`p` = premium; `r` = regular; `e` = ethanol; `d` = diesel; `g` = gás)",
+    x = "",
+    y = ""
+)
+```
+---
+
+Pode observar que o gás representa menos de 5%  e o premium mais 90%
+
+----
+
+**4 Histograma**
+
+---
+```{r}
+notas_tidy %>% 
+  ggplot() +
+  aes(x = notas) +
+  geom_histogram(fill = "blue", color = "black", binwidth = 1) +
+  labs(
+    title = "Histograma das Notas",
+    x = "Notas",
+    y = ""
+  ) +
+  theme_minimal()
+
+```
+---
+
+Pode observar que a maior parte das notas é 6.0, porém o número de notas 5.0 e 4.0 ainda é muito alto.
+
+---
+
+**5 Gráfico de Densidade**
+
+----
+```{r}
+notas_tidy %>% 
+  ggplot() +
+  aes(x = notas) +
+  geom_density(aes(fill = curso), alpha = 0.3) +
+  facet_grid(curso~.) +
+  scale_fill_viridis_d()
+```
+---
+
+Pode observar  que não tem muita diferença de notas entre o curso de quimica e matemáticas.
+
+
+----
+
+**6 Boxplot**
+
+---
+```{r}
+notas_tidy %>% 
+  ggplot() +
+  aes(x = ano, y= notas) +
+  geom_boxplot(aes(fill = ano), show.legend = FALSE) +
+  scale_fill_viridis_d()
+```
+
+---
+
+Comparado ao gráfico de linhas o Boxplot apresenta mais dificuldade para interpretação mesmo
+apresentado os mesmo dados  do gráfico de linhas
